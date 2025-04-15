@@ -1,0 +1,279 @@
+/* styles.css */
+body {
+    font-family: 'Roboto', 'Arial', sans-serif;
+    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('/static/images/brain-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 20px;
+    color: #0277bd;
+    min-height: 100vh; /* Ensure body takes full viewport height */
+    display: flex; /* Flexbox for vertical centering */
+    flex-direction: column; /* Stack children vertically */
+    justify-content: center; /* Center content vertically */
+}
+
+h1 {
+    color: #ffffff;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+h2, h3, h4, h5 {
+    color: #0277bd;
+    font-weight: 600;
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 2em;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+form {
+    display: flex; /* Flexbox for centering input and button */
+    flex-direction: column; /* Stack input and button vertically */
+    align-items: center; /* Center horizontally */
+    justify-content: center; /* Center vertically within form */
+    margin: 0 auto; /* Center form horizontally in body */
+    width: 100%; /* Full width for responsiveness */
+    max-width: 500px; /* Optional: limit form width */
+}
+
+input[type="file"] {
+    padding: 10px;
+    border: 2px dashed #4fc3f7;
+    border-radius: 8px;
+    background-color: #fff;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+    width: 100%; /* Full width within form */
+    box-sizing: border-box;
+    margin-bottom: 15px; /* Space between input and button */
+}
+
+input[type="file"]:hover {
+    border-color: #0288d1;
+}
+
+button[type="submit"], .accordion-btn {
+    background-color: #ffca28;
+    color: #fff;
+    border: none;
+    padding: 12px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 100%; /* Full width within form */
+    box-sizing: border-box;
+}
+
+button[type="submit"]:hover, .accordion-btn:hover {
+    background-color: #ffb300;
+    transform: translateY(-2px);
+}
+
+/* Rest of your CSS remains unchanged until media queries */
+#loading {
+    text-align: center;
+    color: #4caf50;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-top: 20px;
+}
+
+.left-section {
+    width: 65%;
+    background: #ffffff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.right-section {
+    width: 30%;
+    background: #fffde7;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.results {
+    margin-top: 20px;
+}
+
+.image-container {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.image-box {
+    text-align: center;
+    background: #e3f2fd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease;
+}
+
+.image-box:hover {
+    transform: scale(1.05);
+}
+
+.image-box img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 5px;
+    border: 2px solid #81d4fa;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+ul li {
+    padding: 8px 0;
+    color: #424242;
+    font-size: 1.1em;
+}
+
+.accordion-btn {
+    background-color: #4caf50;
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+.accordion-btn:hover {
+    background-color: #43a047;
+}
+
+.accordion-content {
+    display: none;
+    padding: 15px;
+    background: #f1f8e9;
+    border-radius: 5px;
+    margin-top: 5px;
+    border-left: 4px solid #81c784;
+}
+
+#country-select {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 2px solid #4fc3f7;
+    background-color: #fff;
+    font-size: 1em;
+    color: #0277bd;
+    transition: border-color 0.3s ease;
+}
+
+#country-select:hover, #country-select:focus {
+    border-color: #0288d1;
+    outline: none;
+}
+
+#hospital-list li {
+    padding: 5px 0;
+    color: #388e3c;
+}
+
+.accordion-btn.active + .accordion-content {
+    display: block;
+}
+
+/* Mobile Optimization with Media Queries */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .left-section, .right-section {
+        width: 100%;
+        margin-bottom: 20px;
+    }
+
+    .image-container {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .image-box {
+        width: 90%;
+        margin-bottom: 15px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+
+    h3, h4, h5 {
+        font-size: 1.2em;
+    }
+
+    ul li {
+        font-size: 1em;
+    }
+
+    .accordion-btn {
+        font-size: 14px;
+        padding: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+
+    button[type="submit"], .accordion-btn {
+        padding: 10px 15px;
+        font-size: 14px;
+    }
+
+    input[type="file"] {
+        padding: 8px;
+    }
+
+    .image-box {
+        padding: 10px;
+    }
+
+    h1 {
+        font-size: 1.5em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+}
+
+.download-btn {
+    display: inline-block;
+    background: #28a745;
+    color: white;
+    padding: 10px 15px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+.download-btn:hover {
+    background: #218838;
+}

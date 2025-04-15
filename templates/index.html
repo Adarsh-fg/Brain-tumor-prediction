@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Tumor Detection & AI Guidance</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- Keep all previous CSS --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(to bottom, #ffffff, #82e2ff); /* Smooth gradient */
+            color: #212529;
+            min-height: 100vh; /* Full viewport height */
+            margin: 0; /* Remove default margin */
+            display: flex; /* Prepping for centering if needed */
+            /* flex-direction: column; Ensures proper flow */
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 1140px; /* Slightly wider max width */
+            margin: 20px auto; /* Center container */
+            background: #fff;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08); /* Softer shadow */
+            overflow: hidden; /* Prevent content overflow */
+        }
+        h1, h2, h3 { color: #0056b3; margin-bottom: 1rem; }
+        h1 { text-align: center; font-size: 1.8rem; }
+        h2 { font-size: 1.5rem; border-bottom: 1px solid #dee2e6; padding-bottom: 0.5rem; }
+        h3 { font-size: 1.2rem; }
+        h1 i { margin-right: 10px; } /* Space icon in H1 */
+
+        form {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa; /* Match body */
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600; /* Slightly bolder labels */
+            color: #495057;
+            text-align: left; /* Align labels left */
+        }
+
+        input[type="file"], select {
+            border: 1px solid #ced4da; /* Standard border color */
+            display: block; /* Make block for full width */
+            width: 100%; /* Full width */
+            padding: 0.5rem 0.75rem; /* Consistent padding */
+            font-size: 1rem;
+            line-height: 1.5;
+            color: #495057;
+            background-color: #fff;
+            border-radius: 0.25rem;
+            transition: border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        }
+        select {
+             appearance: none; /* Remove default arrow on some browsers */
+             background-image: url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23333" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/></svg>'); /* Custom arrow */
+             background-repeat: no-repeat;
+             background-position: right .7em top 50%;
+             background-size: .65em auto;
+             padding-right: 2.5em; /* Make space for arrow */
+        }
+
+        input[type="submit"] {
+            display: inline-block; /* Keep inline */
+            font-weight: 600;
+            color: #fff;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            background-color: #007bff;
+            border: 1px solid #007bff;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            line-height: 1.5;
+            border-radius: 0.25rem;
+            transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+            margin-top: 10px;
+        }
+        input[type="submit"]:hover { background-color: #0056b3; border-color: #0056b3; }
+
+        /* --- Results & Image Display --- */
+        .results { margin-top: 30px; padding: 20px; background-color: #e9ecef; border-radius: 5px; }
+        .image-display {
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping */
+            justify-content: space-around; /* Space out items */
+            gap: 20px; /* Gap between items */
+            margin-bottom: 25px;
+        }
+        .image-display > div { /* Target direct children divs */
+            flex: 1 1 30%; /* Grow, shrink, base width ~30% */
+            min-width: 250px; /* Minimum width before wrapping */
+            text-align: center;
+            background-color: #fff; /* White background for cards */
+            padding: 15px;
+            border-radius: 5px;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .image-display h3 { font-size: 1.1rem; margin-bottom: 10px; color: #495057; }
+        .image-display img {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Remove extra space below image */
+            margin: 0 auto; /* Center image if smaller than container */
+            border-radius: 4px;
+            border: 1px solid #e9ecef; /* Light border */
+        }
+        .prediction-info {
+             font-size: 1.1em; margin-bottom: 20px; padding: 15px;
+             background-color: #fff; border: 1px solid #dee2e6;
+             border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .prediction-info strong { color: #d9534f; }
+
+        /* --- Chart & AI Sections --- */
+        .chart-container {
+            width: 100%; /* Full width on small screens */
+            max-width: 600px; /* Max width */
+            margin: 30px auto; background-color: #fff; padding: 20px;
+            border-radius: 5px; border: 1px solid #dee2e6; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .chart-container h3 { text-align: center; color: #495057; margin-bottom: 15px; }
+        .guidance, .hospitals {
+            margin-top: 25px; padding: 20px; background-color: #fff;
+            border: 1px solid #dee2e6; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .guidance h3, .hospitals h3 { /* Styling for AI section headers */
+             color: #0056b3; margin-top: 0; border-bottom: 1px solid #dee2e6;
+             padding-bottom: 10px; display: flex; align-items: center; font-size: 1.3rem;
+        }
+        .guidance h3 i, .hospitals h3 i { margin-right: 10px; }
+        .ai-content { /* Container for rendered Markdown */
+             white-space: pre-wrap; word-wrap: break-word; background-color: #f8f9fa; /* Light background inside */
+             padding: 15px; border: 1px solid #e9ecef; border-radius: 4px;
+             font-family: inherit; font-size: 1rem; line-height: 1.6; margin-top: 15px;
+        }
+        .ai-content strong, .ai-content b { font-weight: 600; }
+        .ai-content ul, .ai-content ol { padding-left: 25px; margin-top: 0.5rem; margin-bottom: 1rem; }
+        .ai-content li { margin-bottom: 0.5rem; }
+        .ai-disclaimer {
+             font-size: 0.9em; color: #6c757d; margin-bottom: 15px; padding: 10px;
+             background-color: #fff3cd; /* Warning background */ border-left: 4px solid #ffeeba; /* Warning border */
+             font-style: italic;
+        }
+         .ai-disclaimer i { margin-right: 5px; color: #ffc107; } /* Warning icon color */
+
+        /* --- Error Message Styling --- */
+        .error {
+             color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb;
+             padding: 1rem 1.25rem; border-radius: 0.25rem; font-weight: 600;
+             text-align: center; margin: 15px 0;
+        }
+         .error i { margin-right: 5px; }
+
+        /* --- Loading Spinner Styles --- */
+        #loading-spinner {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in view */
+            z-index: 9999; /* On top of everything */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent white overlay */
+            /* Center the spinner */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .spinner {
+            border: 8px solid #f3f3f3; /* Light grey */
+            border-top: 8px solid #007bff; /* Blue */
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            h1 { font-size: 1.6rem; }
+            .container { padding: 15px; margin: 10px auto; }
+            .image-display > div {
+                flex-basis: 45%; /* Two columns on tablets */
+                min-width: 200px;
+            }
+            .chart-container { padding: 15px; }
+            .form-group label { font-size: 0.95rem; }
+        }
+
+        @media (max-width: 576px) {
+            body { padding: 10px; }
+            h1 { font-size: 1.4rem; }
+            h2 { font-size: 1.3rem; }
+            h3 { font-size: 1.1rem; }
+            .container { padding: 10px; margin: 5px auto; }
+             /* Stack images vertically on small screens */
+            .image-display { flex-direction: column; align-items: center; }
+            .image-display > div {
+                flex-basis: 95%; /* Almost full width */
+                width: 95%; /* Ensure width */
+                min-width: unset; /* Remove min-width */
+                margin-bottom: 15px; /* Space when stacked */
+            }
+            input[type="file"], select, input[type="submit"] { font-size: 0.9rem; padding: 0.4rem 0.6rem; }
+            .chart-container { padding: 10px; }
+            .guidance, .hospitals { padding: 15px; }
+            .ai-content { padding: 10px; font-size: 0.95rem; }
+        }
+
+        .toggle-buttons {
+             margin: 25px 0 15px 0; /* Space above/below buttons */
+             text-align: center; /* Center buttons */
+             border-top: 1px solid #e9ecef; /* Separator line above */
+             padding-top: 20px; /* Space above buttons */
+        }
+        .toggle-button {
+            background-color: #6c757d; /* Secondary/Gray color */
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px; /* Space between buttons */
+            font-size: 0.95em;
+            transition: background-color 0.2s, box-shadow 0.2s;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        .toggle-button:hover {
+            background-color: #5a6268;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+        }
+        /* Optional: Style for button when its section is open */
+        .toggle-button.active {
+             background-color: #0056b3; /* Use primary color */
+        }
+
+        /* --- Initially Hide AI Sections --- */
+        #guidance-content, #hospitals-content {
+            display: none; /* Hide sections by default */
+        }
+
+/* Floating Button */
+.chatbox__button {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+}
+
+.chatbox__button button {
+  background-color: #0056b3;
+  color: #fff;
+  border: none;
+  padding: 16px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.chatbox__button button:hover {
+  transform: scale(1.1);
+}
+
+/* Chat Popup */
+.chatbox__support {
+  position: fixed;
+  bottom: 100px;
+  right: 24px;
+  width: 340px;
+  max-height: 500px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  z-index: 999;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Show chat popup */
+.chatbox--active {
+  display: flex !important;
+  animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+  from { transform: translateY(40px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* Header */
+.chatbox__header {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  background-color: #0056b3;
+  color: #fff;
+}
+
+.chatbox__image--header img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.chatbox__heading--header {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.chatbox__description--header {
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Messages */
+.chatbox__messages {
+  flex: 1;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+}
+
+.messages__item {
+  max-width: 75%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.messages__item--visitor {
+  align-self: flex-end;
+  background-color: #0056b3;
+  color: white;
+  border-bottom-right-radius: 5px;
+}
+
+.messages__item--operator {
+  align-self: flex-start;
+  background-color: white;
+  color: black;
+  border-bottom-left-radius: 5px;
+}
+
+/* Footer */
+.chatbox__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.chatbox__footer input {
+    flex: 1; /* Ensures input takes available space */
+    margin-right: 10px;
+    padding: 8px;
+    border-radius: 15px;
+    border: 1px solid #ccc;
+}
+
+.chatbox__footer button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 15px;
+    background-color: #0d6efd;
+    color: white;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.chatbox__footer button:hover {
+    background-color: #084298;
+}
+
+.chatbox__footer .clear-btn {
+    background-color: #dc3545;
+    margin-left: 8px; /* Adds spacing between buttons */
+}
+
+.chatbox__footer .clear-btn:hover {
+    background-color: #a71d2a;
+}
+
+
+
+
+
+
+</style>
+</head>
+<body>
+    <!-- Loading Spinner Element -->
+    <div id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+
+    <div class="container">
+        <h1><i class="fas fa-brain"></i> Brain Tumor Detection & AI Guidance</h1>
+
+        <form id="upload-form" method="POST" enctype="multipart/form-data">
+            <!-- Form fields (file, country) -->
+            <div class="form-group">
+                <label for="file">1. Upload Brain Scan Image (JPG, JPEG, PNG):</label>
+                <input type="file" name="file" id="file" accept=".jpg, .jpeg, .png" required>
+            </div>
+            <div class="form-group">
+                <label for="country">2. Select Your Country (Optional - for Hospital Suggestions):</label>
+                <select name="country" id="country">
+                    <option value="">-- Select Country (Optional) --</option>
+                    <option value="USA">USA</option>
+                    <option value="India">India</option>
+                    <option value="UK">UK</option>
+                    <option value="Germany">Germany</option>
+                    <option value="Canada">Canada</option>
+                    <option value="Australia">Australia</option>
+                    <option value="Singapore">Singapore</option>
+                    <option value="Other">Other (Suggest Global)</option>
+                </select>
+            </div>
+            <input type="submit" value="Analyze Image">
+        </form>
+
+        {% if error_message %}
+            <p class="error"><i class="fas fa-exclamation-triangle"></i> {{ error_message }}</p>
+        {% endif %}
+
+        {% if prediction %}
+            <div class="results">
+                <h2>Analysis Results</h2>
+
+                <!-- Updated Image Display Section -->
+                <div class="image-display">
+                    <div>
+                        <h3>Original Image</h3>
+                        {% if image_path %}
+                            <img src="{{ url_for('uploaded_file', filename=image_path) }}" alt="Original Scan">
+                        {% else %}<p>N/A</p>{% endif %}
+                    </div>
+                    <div>
+                        <h3>Segmented Image</h3>
+                         {% if segmented_path %}
+                            <img src="{{ url_for('uploaded_file', filename=segmented_path) }}" alt="Segmented Tumor Area">
+                        {% else %}<p>(Not Available)</p>{% endif %}
+                    </div>
+                     <div>
+                        <h3>Tumor Overlay</h3> {# New section for overlay #}
+                         {% if overlay_path %}
+                            <img src="{{ url_for('uploaded_file', filename=overlay_path) }}" alt="Tumor Overlay on Original">
+                        {% else %}<p>(Not Available)</p>{% endif %}
+                    </div>
+                    {# Remove the separate Tumor Mask display if overlay is preferred #}
+                    {# <div>
+                        <h3>Tumor Mask</h3>
+                        {% if mask_path %}
+                            <img src="{{ url_for('uploaded_file', filename=mask_path) }}" alt="Tumor Mask">
+                        {% else %}<p>(Not Available)</p>{% endif %}
+                    </div> #}
+                </div>
+
+                <!-- Prediction Info Section -->
+                <div class="prediction-info">
+                    Detected Tumor Type: <strong>{{ prediction }}</strong> <br>
+                    Confidence: {{ confidence }}%
+                </div>
+
+                <!-- Chart Section -->
+                 {% if probabilities and labels and probabilities|length == labels|length %}
+                 <div class="chart-container">
+                    <h3>Prediction Probabilities</h3>
+                    <canvas id="probabilityChart"></canvas>
+                 </div>
+                 <script>
+                    try {
+                        const labels = {{ labels | tojson | safe }};
+                        const probabilities = {{ probabilities | tojson | safe }};
+                
+                        const ctx = document.getElementById('probabilityChart').getContext('2d');
+                        const probabilityChart = new Chart(ctx, {
+                            type: 'bar',
+                            data: {
+                                labels: labels,
+                                datasets: [{
+                                    label: 'Probability',
+                                    data: probabilities,
+                                    backgroundColor: [
+                                        'rgba(217, 83, 79, 0.6)',
+                                        'rgba(91, 192, 222, 0.6)',
+                                        'rgba(92, 184, 92, 0.6)',
+                                        'rgba(240, 173, 78, 0.6)',
+                                        'rgba(153, 102, 255, 0.6)'
+                                    ],
+                                    borderColor: [
+                                        'rgba(217, 83, 79, 1)',
+                                        'rgba(91, 192, 222, 1)',
+                                        'rgba(92, 184, 92, 1)',
+                                        'rgba(240, 173, 78, 1)',
+                                        'rgba(153, 102, 255, 1)'
+                                    ],
+                                    borderWidth: 1
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        max: 1.0
+                                    }
+                                },
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    },
+                                    tooltip: {
+                                        callbacks: {
+                                            label: function (context) {
+                                                let label = context.dataset.label || '';
+                                                if (label) label += ': ';
+                                                if (context.parsed.x !== null) {
+                                                    label += (context.parsed.x * 100).toFixed(1) + '%';
+                                                }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        console.error("Error creating chart:", e);
+                        const chartContainer = document.querySelector('.chart-container');
+                        if (chartContainer) {
+                            chartContainer.innerHTML += '<p class="error">Could not display chart.</p>';
+                        }
+                    }
+                </script>
+                
+                
+                 {% else %}
+                    <p>Probability data not available for chart display.</p>
+                 {% endif %}
+
+
+                <!-- Buttons to Toggle AI Sections -->
+                <div class="toggle-buttons">
+                    {% if next_steps_html or lifestyle_html %} {# Only show button if there's content #}
+                        <button id="toggle-guidance-btn" class="toggle-button">
+                            <i class="fas fa-lightbulb"></i> Show AI Guidance
+                        </button>
+                    {% endif %}
+                    {% if hospitals_html and hospitals_html != "N/A" and prediction != 'notumor' %} {# Only show button if there's content #}
+                        <button id="toggle-hospitals-btn" class="toggle-button">
+                            <i class="fas fa-hospital"></i> Show Hospital Suggestions
+                        </button>
+                    {% endif %}
+                </div>
+
+
+                <!-- Collapsible AI Guidance Section -->
+                {% if next_steps_html or lifestyle_html %}
+                    <div id="guidance-content" class="guidance"> {# Assign ID, keep class #}
+                        <h3><i class="fas fa-lightbulb"></i> AI-Powered Guidance (Informational Only)</h3>
+                         {# ... (Disclaimer logic) ... #}
+                         {% if not (next_steps_html and ('Disclaimer:' in next_steps_html or 'always consult' in next_steps_html|lower)) %}
+                         <p class="ai-disclaimer">
+                            <i class="fas fa-exclamation-circle"></i> AI-generated, informational only. **NOT** medical advice. **Always consult qualified health providers.**
+                         </p>
+                         {% endif %}
+                        {% if next_steps_html %}
+                            <div class="ai-content">{{ next_steps_html | safe }}</div>
+                        {% endif %}
+                         {% if lifestyle_html %}
+                            <div class="ai-content">{{ lifestyle_html | safe }}</div>
+                        {% endif %}
+                    </div>
+                 {% endif %}
+
+
+                 <!-- Collapsible AI Hospital Suggestions Section -->
+                 {% if hospitals_html and hospitals_html != "N/A" and prediction != 'notumor' %}
+                    <div id="hospitals-content" class="hospitals"> {# Assign ID, keep class #}
+                        <h3>
+                            <i class="fas fa-hospital"></i> AI-Suggested Treatment Centers
+                            {% if selected_country and selected_country != 'Other' %} in {{ selected_country }}{% else %} (Global/Major Regions){% endif %}
+                        </h3>
+                         {# ... (Disclaimer logic) ... #}
+                          {% if not ('Disclaimer:' in hospitals_html or 'must research' in hospitals_html|lower) %}
+                          <p class="ai-disclaimer">
+                             <i class="fas fa-exclamation-circle"></i> AI-generated list, not exhaustive/endorsement. Research & consult medical team.
+                          </p>
+                          {% endif %}
+                        <div class="ai-content">{{ hospitals_html | safe }}</div>
+                    </div>
+                 {% endif %}
+
+            </div> {# End of .results div #}
+        {% endif %} {# End of if prediction #}
+
+    </div> {# End of .container div #}
+
+<!-- Chat Floating Button -->
+<div class="chatbox__button">
+    <button><img src="https://img.icons8.com/material-rounded/24/ffffff/chat.png" /></button>
+  </div>
+  
+  <!-- Chat Popup Panel -->
+  <div class="chatbox__support">
+    <div class="chatbox__header">
+      <div class="chatbox__image--header">
+        <img src="{{ url_for('static', filename='images/brain_logo.png') }}" alt="Bot" />
+      </div>
+      <div class="chatbox__content--header">
+        <h4 class="chatbox__heading--header">BrainCare Bot</h4>
+        <p class="chatbox__description--header">Ask me anything about brain tumors</p>
+      </div>
+    </div>
+  
+    <div class="chatbox__messages" id="chatbox-messages"></div>
+  
+    <div class="chatbox__footer">
+      <input type="text" placeholder="Write a message..." id="chat-input" />
+      <button class="send__button">Send</button>
+      <button id="clear-button">Clear</button>
+    </div>
+  </div>
+  
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <!-- JavaScript for Spinner AND Toggles -->
+    <script>
+        // --- Spinner Logic (Keep as before) ---
+        const uploadForm = document.getElementById('upload-form');
+        const spinner = document.getElementById('loading-spinner');
+        if (uploadForm) {
+            uploadForm.addEventListener('submit', function() {
+                if (spinner) spinner.style.display = 'flex';
+            });
+        }
+        window.addEventListener('pageshow', function(event) {
+             if (spinner) spinner.style.display = 'none';
+        });
+
+        // --- Toggle Logic for AI Sections ---
+        const guidanceBtn = document.getElementById('toggle-guidance-btn');
+        const hospitalsBtn = document.getElementById('toggle-hospitals-btn');
+        const guidanceContent = document.getElementById('guidance-content');
+        const hospitalsContent = document.getElementById('hospitals-content');
+
+        // Function to toggle visibility and button state
+        function toggleSection(button, content, showText, hideText) {
+            if (!button || !content) return; // Exit if elements don't exist
+
+            button.addEventListener('click', function() {
+                const isHidden = content.style.display === 'none' || content.style.display === '';
+                if (isHidden) {
+                    content.style.display = 'block'; // Show the content
+                    button.innerHTML = `<i class="${button.querySelector('i').className}"></i> ${hideText}`; // Update text
+                    button.classList.add('active');
+                } else {
+                    content.style.display = 'none'; // Hide the content
+                    button.innerHTML = `<i class="${button.querySelector('i').className}"></i> ${showText}`; // Update text
+                    button.classList.remove('active');
+                }
+            });
+        }
+
+        // Initialize toggles
+        toggleSection(guidanceBtn, guidanceContent, 'Show AI Guidance', 'Hide AI Guidance');
+        toggleSection(hospitalsBtn, hospitalsContent, 'Show Hospital Suggestions', 'Hide Hospital Suggestions');
+
+
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+          const chatToggleBtn = document.querySelector('.chatbox__button button');
+          const chatbox = document.querySelector('.chatbox__support');
+          const sendBtn = document.querySelector('.send__button');
+          const input = document.getElementById('chat-input');
+          const messages = document.getElementById('chatbox-messages');
+          const clearBtn = document.getElementById('clear-button');
+      
+          const STORAGE_KEY = 'braincare_chat_history';
+      
+          function loadChatHistory() {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            messages.innerHTML = '';
+            history.forEach(entry => {
+              messages.innerHTML += `<div class="messages__item messages__item--${entry.sender}">${entry.text}</div>`;
+            });
+            messages.scrollTop = messages.scrollHeight;
+          }
+      
+          function saveMessage(sender, text) {
+            const history = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+            history.push({ sender, text });
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
+          }
+      
+          function sendMessage() {
+            const msg = input.value.trim();
+            if (!msg) return;
+      
+            messages.innerHTML += `<div class="messages__item messages__item--visitor">${msg}</div>`;
+            saveMessage('visitor', msg);
+            input.value = '';
+            messages.scrollTop = messages.scrollHeight;
+      
+            fetch("/chat", {
+              method: "POST",
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: msg }),
+            })
+              .then(res => res.json())
+              .then(data => {
+                const html = data.response;
+                messages.innerHTML += `<div class="messages__item messages__item--operator">${html}</div>`;
+                saveMessage('operator', data.response);
+                messages.scrollTop = messages.scrollHeight;
+              });
+          }
+      
+          // Toggle chat window
+          chatToggleBtn.addEventListener('click', () => {
+            chatbox.classList.toggle('chatbox--active');
+            if (chatbox.classList.contains('chatbox--active')) {
+              loadChatHistory();
+            }
+          });
+      
+          // Send on click or Enter
+          sendBtn.addEventListener('click', sendMessage);
+          input.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+          });
+      
+          // Clear chat
+          clearBtn.addEventListener('click', async () => {
+            messages.innerHTML = '';
+            localStorage.removeItem(STORAGE_KEY);
+      
+            // Optional backend call to clear history
+            await fetch('/clear_chat', { method: 'POST' })
+              .then(res => res.json())
+              .then(data => console.log(data.message))
+              .catch(err => console.error('Failed to clear chat history:', err));
+          });
+        });
+      </script>
+        
+
+</body>
+</html>
