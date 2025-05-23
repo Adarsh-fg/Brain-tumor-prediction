@@ -1,0 +1,19 @@
+# Core Web and Utility Libraries
+Flask
+python-dotenv
+
+# Machine Learning & Image Processing
+tensorflow
+numpy
+opencv-python
+Pillow
+matplotlib
+
+# Markdown Rendering
+markdown
+
+# Google Generative AI SDK
+google-generativeai
+
+# Optional (depending on your OS for compatibility)
+Werkzeug
